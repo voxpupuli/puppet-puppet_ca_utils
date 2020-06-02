@@ -1,39 +1,38 @@
-plan change_ca_file::sync_ca_file (
-  TargetSpec $ca_hostname,
+plan manage_ca_file::sync_ca_file (
+  TargetSpec $remote_ca_hostname,
 ) {
+  $local_ca_hostname_array = puppetdb_query('resources[certname] { type = "Class" and title = "Puppet_enterprise::Profile::Certificate_authority" }')
+  $local_ca_hostname = $local_ca_hostname_array[0]['certname']
+
   # Get remote ca
-  $ca_resultset =  run_task('change_ca_file::change_ca_content', localhost, ca_hostname => $ca_hostname)
+  $ca_resultset =  run_task('manage_ca_file::remote_ca_content', $local_ca_hostname, ca_hostname => $remote_ca_hostname)
 
   $remote_ca = strip($ca_resultset.first().value()['ca'])
 
   # Get local ca
-  $local_ca = file::read('/etc/puppetlabs/puppet/ssl/certs/ca.pem')
+  $local_ca_resultset = run_task('manage_ca_file::remote_ca_content', $local_ca_hostname, ca_hostname => $local_ca_hostname)
+
+  $local_ca = $local_ca_resultset.first().value()['ca']
 
   # Check to see if remote ca is already contained in local ca
-  $local_ca_include_remote_ca_resultset = run_task('change_ca_file::check_for_existing_ca', localhost, local_ca => $local_ca, remote_ca => $remote_ca)
+  $local_ca_include_remote_ca_resultset = run_task('manage_ca_file::check_for_existing_ca', $local_ca_hostname, local_ca => $local_ca, remote_ca => $remote_ca_hostname)
 
   $local_ca_include_remote_ca = $local_ca_include_remote_ca_resultset.first().value()['local_ca_include_remote_ca']
 
+  # Sync all nodes
   unless $local_ca_include_remote_ca {
     $all_cas = "${remote_ca}\n${local_ca}"
 
-    # file::write('/etc/puppetlabs/puppet/ssl/certs/ca.bk', $local_ca)
-    # file::write('/etc/puppetlabs/puppet/ssl/certs/ca.pem', $all_cas)
-
-    # $all_certs_array = puppetdb_query('inventory[certname] { facts.aio_agent_version ~ "\\d+" }')
-    $all_certs_array = puppetdb_query('inventory[certname] { facts.fqdn = "new001.fervid.us" }')
+    $all_certs_array = puppetdb_query('inventory[certname] { facts.aio_agent_version ~ "\\\\d+" }')
 
     $all_certs = $all_certs_array.map | $cert | {
       $cert['certname']
     }
 
+    # $all_cert_targets = get_targets($all_certs)
     $all_cert_targets = get_targets($all_certs)
 
-    apply($all_cert_targets) {
-      file { '/etc/puppetlabs/puppet/ssl/certs/ca.pem':
-        ensure  => file,
-        content => $all_cas,
-      }
-    }
+    # Check to see if remote ca is already contained in local ca
+    $write_new_ca_resultset = run_task('manage_ca_file::write_file', $all_cert_targets[1], filepath => '/etc/puppetlabs/puppet/ssl/certs/ca.pem', content => $all_cas)
   }
 }
