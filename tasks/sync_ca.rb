@@ -37,7 +37,7 @@ class SyncCAContent < TaskHelper
     }
 
     # Remove duplicates
-    all_crls.uniq!
+    all_crls.uniq! { |crl| crl.to_pem() }
 
     # # Get back pem representations
     # unique_crls = all_crls.select { |crl|
