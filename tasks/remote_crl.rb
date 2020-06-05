@@ -18,15 +18,15 @@ class RemoteCRLContent < TaskHelper
 
     local_crls = stdout.split(delimeter)
 
-    local_crls.each { |local_crl|
+    local_crls.each do |local_crl|
       next_crl = OpenSSL::X509::CRL.new("#{local_crl}\n-----END X509 CRL-----")
-    
-      keyid_array << %r{(keyid.+),}.match(next_crl.extensions()[0].to_s())[1]
-    }
+
+      keyid_array << %r{(keyid.+),}.match(next_crl.extensions[0].to_s)[1]
+    end
 
     {
       keyids: keyid_array,
-      crl: stdout
+      crl: stdout,
     }
   end
 end

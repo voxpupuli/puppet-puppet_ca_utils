@@ -13,7 +13,7 @@ class SyncCAContent < TaskHelper
 
     # Get remote ca
     cmd = ['curl', '-k', '-s', "https://#{kwargs[:ca_hostname]}:8140/puppet-ca/v1/certificate/ca"]
-    stdout, stderr, status = Open3.capture3(*cmd) # rubocop:disable Lint/UselessAssignment
+    stdout, stderr, status = Open3.capture3(*cmd)
     raise Puppet::Error, _("{ stderr: #{stderr} }") if status != 0
 
     # Read current ca_crl file
@@ -25,19 +25,19 @@ class SyncCAContent < TaskHelper
     local_ca_strings = local_cas_all.split(delimeter)
 
     # Get all certs as ruby CRL objects
-    local_ca_strings.each { |local_ca|
+    local_ca_strings.each do |local_ca|
       all_crls << OpenSSL::X509::Certificate.new("#{local_ca}\n-----END CERTIFICATE-----\n-")
-    }
+    end
 
     remote_crls_strings = stdout.split(delimeter)
 
     # Get all certs as ruby CRL objects
-    remote_crls_strings.each { |remote_crl|
+    remote_crls_strings.each do |remote_crl|
       all_crls << OpenSSL::X509::Certificate.new("#{remote_crl}\n-----END CERTIFICATE-----\n")
-    }
+    end
 
     # Remove duplicates
-    all_crls.uniq! { |crl| crl.to_pem() }
+    all_crls.uniq! { |crl| crl.to_pem }
 
     # # Get back pem representations
     # unique_crls = all_crls.select { |crl|
