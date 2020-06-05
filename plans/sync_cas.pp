@@ -4,7 +4,7 @@ plan manage_ca_file::sync_cas (
   $local_ca_hostname_array = puppetdb_query('resources[certname] { type = "Class" and title = "Puppet_enterprise::Profile::Certificate_authority" }')
   $local_ca_hostname = $local_ca_hostname_array[0]['certname']
 
-  # Get local ca
+  # Sync remote and local CA
   $local_ca_resultset = run_task('manage_ca_file::sync_ca', $local_ca_hostname, ca_hostname => $remote_ca_hostname)
 
   $all_cas = $local_ca_resultset.first().value()['ca']
@@ -19,15 +19,15 @@ plan manage_ca_file::sync_cas (
   # $all_cert_targets = get_targets($all_certs)
   $all_cert_targets = get_targets($all_certs)
 
-  # Check to see if remote ca is already contained in local ca
-  $write_new_ca_resultset = run_task('manage_ca_file::write_file', $all_cert_targets, filepath => '/etc/puppetlabs/puppet/ssl/certs/ca.pem', content => $all_cas)
+  # Write new CAs to agent nodes
+  run_task('manage_ca_file::write_file', $all_cert_targets, filepath => '/etc/puppetlabs/puppet/ssl/certs/ca.pem', content => $all_cas)
 
-  # Get remote ca
+  # Get remote crl
   $crl_resultset =  run_task('manage_ca_file::remote_crl', $local_ca_hostname, ca_hostname => $remote_ca_hostname)
 
   $remote_crl_result = $crl_resultset.first().value()
 
-  # Get local ca
+  # Sync local CRL
   $local_crl_resultset = run_task(
                                   'manage_ca_file::sync_crl',
                                   $local_ca_hostname,
@@ -46,6 +46,9 @@ plan manage_ca_file::sync_cas (
   # $all_cert_targets = get_targets($all_certs)
   $all_crl_targets = get_targets($all_crl_nodes)
 
-  # Check to see if remote ca is already contained in local ca
-  $write_new_crl_resultset = run_task('manage_ca_file::write_file', $all_crl_targets, filepath => '/etc/puppetlabs/puppet/ssl/crl.pem', content => $crl)
+  # Write CRLs to agent nodes
+  run_task('manage_ca_file::write_file', $all_crl_targets, filepath => '/etc/puppetlabs/puppet/ssl/crl.pem', content => $crl)
+
+  # Restart server
+  run_task('service', $local_ca_hostname, action => 'restart', name => 'pe-puppetserver')
 }
