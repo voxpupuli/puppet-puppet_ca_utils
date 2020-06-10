@@ -1,0 +1,7 @@
+{
+  "puppet_task_version": 1,
+  "supports_noop": false,
+  "description": "Return the full on-disk CRL bundle",
+  "parameters": { },
+  "input_method": "stdin"
+}
