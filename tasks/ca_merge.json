@@ -1,15 +1,11 @@
 {
   "puppet_task_version": 1,
   "supports_noop": false,
-  "description": "Given two Puppet CA hosts, create a merged CA bundle",
+  "description": "Given a set of Puppet CA hosts, create a merged CA bundle",
   "parameters": {
-    "ca1_hostname": {
-      "type": "Pattern[/\\A(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9])\\z/]",
-      "description": "Hostname of the first Puppet CA"
-    },
-    "ca2_hostname": {
-      "type": "Pattern[/\\A(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9])\\z/]",
-      "description": "Hostname of the second Puppet CA"
+    "ca_hostnames": {
+      "type": "Array[Pattern[/\\A(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9])\\z/]]",
+      "description": "Hostnames of the Puppet CAs to merge"
     }
   },
   "files": ["ruby_task_helper/files/task_helper.rb"],
