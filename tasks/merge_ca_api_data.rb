@@ -15,7 +15,7 @@ class CAMerge < TaskHelper
     ca_bundle = ca_hostnames.map { |host| get_ca_bundle(host).scan(CERT_SCAN) }
                             .flatten
                             .uniq
-                            .join('')
+                            .join("\n")
 
     # Get the crl data from each CA
     crl_bundle = ca_hostnames.map { |host| get_crl_bundle(host).scan(CRL_SCAN) }

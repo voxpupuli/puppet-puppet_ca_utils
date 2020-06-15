@@ -1,60 +1,50 @@
 plan manage_ca_file::sync_cas (
-  TargetSpec $remote_ca_hostname,
+  TargetSpec     $targets,
+  TargetSpec     $ca_hosts   = $targets,
+  Enum[full,api] $crl_bundle = 'full',
 ) {
-  $local_ca_hostname = puppetdb_query(@(PQL)).first['certname']
-    resources[certname] {
-      type = "Class" and
-      title = "Puppet_enterprise::Profile::Certificate_authority" }
-    | PQL
+  $update_targets = get_targets($targets)
+  $ca_targets  = get_targets($ca_hosts)
 
-  # Sync remote and local CA
-  $local_ca_resultset = run_task('manage_ca_file::sync_ca', $local_ca_hostname,
-    ca_hostname => $remote_ca_hostname
-  )
+  $ca_api_data = run_task('manage_ca_file::merge_ca_api_data', 'local://localhost',
+    ca_hostnames => $ca_targets.map |$t| { $t.name },
+  )[0]
 
-  $all_cas = $local_ca_resultset.first.value['ca']
+  if ($crl_bundle == 'full') {
+    $full_crl_bundle_data = run_task('manage_ca_file::get_full_crl', $ca_targets).map |$r| {
+      $r['crl_bundle']
+    }.manage_ca_file::merge_crl_bundles()
+  }
+  else { # $crl_bundle === 'api'
+    $full_crl_bundle_data = $ca_api_data['crl_bundle']
+  }
 
-  # Sync all nodes
-  $all_certs = puppetdb_query(@(PQL)).map |$res| { $res['certname'] }
-    inventory[certname] {
-      facts.aio_agent_version ~ "\\\\d+" }
-    | PQL
+  # Note that there is a race condition here around the CRL.
+  # See https://tickets.puppetlabs.com/browse/SERVER-2550
+  apply($update_targets) {
+    File {
+      ensure =>  file,
+      owner  => 'pe-puppet',
+      group  => 'pe-puppet',
+    }
 
-  # $all_cert_targets = get_targets($all_certs)
-  $all_cert_targets = get_targets($all_certs)
+    file { '/etc/puppetlabs/puppet/ssl/certs/ca.pem':
+      content => $ca_api_data['ca_bundle'],
+    }
 
-  # Write new CAs to agent nodes
-  run_task('manage_ca_file::write_file', $all_cert_targets,
-    filepath => '/etc/puppetlabs/puppet/ssl/certs/ca.pem',
-    content => $all_cas,
-  )
+    file { '/etc/puppetlabs/puppet/ssl/ca/infra_crl.pem':
+      content => $ca_api_data['crl_bundle'],
+    }
 
-  # Get remote crl
-  $remote_crl_result = run_task('manage_ca_file::remote_crl', $local_ca_hostname,
-    ca_hostname => $remote_ca_hostname,
-  ).first.value
+    file { '/etc/puppetlabs/puppet/ssl/ca/ca_crl.pem':
+      content => $full_crl_bundle_data,
+    }
 
-  # Sync local CRL
-  $crl = run_task('manage_ca_file::sync_crl', $local_ca_hostname,
-    remote_authority_key_identifiers => $remote_crl_result['keyids'],
-    remote_crl_content               => $remote_crl_result['crl']
-  ).first.value['crl']
+    # Question: does Puppet Server need reloading?
+  }
 
-  $all_crl_targets = puppetdb_query(@("PQL")).map |$res| { $res['certname'] }.get_targets
-    inventory[certname] { 
-      facts.aio_agent_version ~ '\\d+' and 
-      facts.trusted.certname != '${local_ca_hostname}' }
-    | PQL
+  # Note: agents and compilers will recieve the updated CA bundle and CRL through normal
+  # distribution means
 
-  # Write CRLs to agent nodes
-  run_task('manage_ca_file::write_file', $all_crl_targets,
-    filepath => '/etc/puppetlabs/puppet/ssl/crl.pem',
-    content  => $crl,
-  )
-
-  # Restart server
-  run_task('service', $local_ca_hostname,
-    action => 'restart',
-    name   => 'pe-puppetserver',
-  )
+  return('Complete')
 }
