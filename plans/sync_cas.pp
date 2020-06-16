@@ -6,7 +6,7 @@ plan manage_ca_file::sync_cas (
   $update_targets = get_targets($targets)
   $ca_targets  = get_targets($ca_hosts)
 
-  $ca_api_data = run_task('manage_ca_file::merge_ca_api_data', 'local://localhost',
+  $ca_api_data = run_task('manage_ca_file::merge_ca_api_data', 'localhost',
     ca_hostnames => $ca_targets.map |$t| { $t.name },
   )[0]
 

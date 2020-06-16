@@ -30,7 +30,9 @@ class CAMerge < TaskHelper
     { ca_bundle: ca_bundle,
       crl_bundle: crl_bundle }
   rescue => e
-    e.backtrace
+    TaskHelper::Error.new(e.message,
+                          'merge-ca-api-data/error',
+                          { 'backtrace' => e.backtrace })
   end
 
   def get_ca_bundle(hostname)
