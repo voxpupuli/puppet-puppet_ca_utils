@@ -34,9 +34,10 @@ plan manage_ca_file::sync_cas (
   # See https://tickets.puppetlabs.com/browse/SERVER-2550
   apply($update_targets) {
     File {
-      ensure =>  file,
+      ensure => file,
       owner  => 'pe-puppet',
       group  => 'pe-puppet',
+      notify => Service['pe-puppetserver'],
     }
 
     file { '/etc/puppetlabs/puppet/ssl/certs/ca.pem':
@@ -52,6 +53,7 @@ plan manage_ca_file::sync_cas (
     }
 
     # Question: does Puppet Server need reloading?
+    service { 'pe-puppetserver': }
   }
 
   # Note: agents and compilers will recieve the updated CA bundle and CRL through normal
