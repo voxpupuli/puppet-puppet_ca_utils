@@ -9,7 +9,7 @@ Puppet::Functions.create_function(:'manage_ca_file::ordered_crl_bundles') do
     param 'String', :crl_bundle
   end
 
-  def ordered_pems(certs_by_name, ca_bundle, crl_bundle)
+  def ordered_pems(certs_by_name, crl_bundle)
     crl_scan = /-----BEGIN X509 CRL-----(?:.|\n)+?-----END X509 CRL-----/
     crls = crl_bundle.scan(crl_scan).map { |crl| OpenSSL::X509::CRL.new(crl) }
     pem_by_name(certs_by_name, crls)
@@ -20,7 +20,7 @@ Puppet::Functions.create_function(:'manage_ca_file::ordered_crl_bundles') do
       cert = OpenSSL::X509::Certificate.new(cert_text)
       ordered_obj_array = x509_obj_array.dup
       unless (idx = ordered_obj_array.find_index { |obj| obj.issuer == cert.issuer })
-        raise "missing ca cert or crl for #{cert}" 
+        raise "missing crl for #{cert.subject.to_s} issuer" 
       end
       [name,
        ordered_obj_array.unshift(ordered_obj_array.delete_at(idx))
