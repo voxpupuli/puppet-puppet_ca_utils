@@ -8,7 +8,7 @@ begin
   content = File.read('/etc/puppetlabs/puppet/ssl/ca/ca_crl.pem')
 
   result = {
-    'crl_bundle' => content
+    'ca_crl' => content
   }
 
   puts result.to_json
