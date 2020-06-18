@@ -3,16 +3,16 @@
 require 'net/http'
 require 'openssl'
 
-Puppet::Functions.create_function(:'manage_ca_file::ordered_crl_bundles') do
+Puppet::Functions.create_function(:'manage_ca_file::ordered_ca_bundles') do
   dispatch :ordered_pems do
     param 'Hash',   :certs_by_name
-    param 'String', :crl_bundle
+    param 'String', :ca_bundle
   end
 
   def ordered_pems(certs_by_name, ca_bundle, crl_bundle)
-    crl_scan = /-----BEGIN X509 CRL-----(?:.|\n)+?-----END X509 CRL-----/
-    crls = crl_bundle.scan(crl_scan).map { |crl| OpenSSL::X509::CRL.new(crl) }
-    pem_by_name(certs_by_name, crls)
+    cert_scan = /-----BEGIN CERTIFICATE-----(?:.|\n)+?-----END CERTIFICATE-----/
+    ca_certs = ca_bundle.scan(cert_scan).map { |crt| OpenSSL::X509::Certificate.new(crt) }
+    pem_by_name(certs_by_name, ca_certs)
   end
 
   def pem_by_name(certs_by_name, x509_obj_array)

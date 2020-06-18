@@ -19,9 +19,10 @@ plan manage_ca_file::sync_cas (
     $full_crl_bundle = $ca_api_data['crl_bundle']
   }
 
-  $ordered_crl_bundles = {
-    'ca'    => manage_ca_file::ordered_crl_bundles($api_ca_data['peer_certs'], $full_crl_bundle),
-    'infra' => manage_ca_file::ordered_crl_bundles($api_ca_data['peer_certs'], $api_ca_data['crl_bundle']),
+  $ordered_pem_bundles = {
+    'ca_crt'    => manage_ca_file::ordered_ca_bundles($api_ca_data['peer_certs'], $api_ca_data['ca_bundle']),
+    'ca_crl'    => manage_ca_file::ordered_crl_bundles($api_ca_data['peer_certs'], $full_crl_bundle),
+    'infra_crl' => manage_ca_file::ordered_crl_bundles($api_ca_data['peer_certs'], $api_ca_data['crl_bundle']),
   }
 
   # We will use the 'name' var in the apply block below
@@ -39,15 +40,15 @@ plan manage_ca_file::sync_cas (
     }
 
     file { '/etc/puppetlabs/puppet/ssl/certs/ca.pem':
-      content => $api_ca_data['ca_bundle'],
-    }
-
-    file { '/etc/puppetlabs/puppet/ssl/ca/infra_crl.pem':
-      content => $ordered_crl_bundles['infra'][$hostname],
+      content => $ordered_pem_bundles['ca_crt'][$hostname],
     }
 
     file { '/etc/puppetlabs/puppet/ssl/ca/ca_crl.pem':
-      content => $ordered_crl_bundles['ca'][$hostname],
+      content => $ordered_pem_bundles['ca_crl'][$hostname],
+    }
+
+    file { '/etc/puppetlabs/puppet/ssl/ca/infra_crl.pem':
+      content => $ordered_pem_bundles['infra_crl'][$hostname],
     }
 
     # Question: does Puppet Server need reloading?
