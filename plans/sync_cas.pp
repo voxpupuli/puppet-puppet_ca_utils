@@ -1,7 +1,8 @@
 plan manage_ca_file::sync_cas (
   TargetSpec     $targets,
-  TargetSpec     $ca_hosts   = $targets,
-  Enum[full,api] $crl_bundle = 'full',
+  TargetSpec     $ca_hosts             = $targets,
+  Enum[full,api] $crl_bundle           = 'full',
+  Boolean        $restart_puppetserver = false,
 ) {
   $update_targets = get_targets($targets)
   $ca_targets  = get_targets($ca_hosts)
@@ -37,7 +38,10 @@ plan manage_ca_file::sync_cas (
       ensure => file,
       owner  => 'pe-puppet',
       group  => 'pe-puppet',
-      notify => Service['pe-puppetserver'],
+      notify => $restart_puppetserver ? {
+        true  => Service['pe-puppetserver'],
+        false => undef,
+      },
     }
 
     file { '/etc/puppetlabs/puppet/ssl/certs/ca.pem':
