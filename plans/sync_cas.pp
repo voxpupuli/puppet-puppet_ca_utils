@@ -19,25 +19,14 @@ plan manage_ca_file::sync_cas (
     $full_crl_bundle = $ca_api_data['crl_bundle']
   }
 
-  $ordered_crl_bundles = manage_ca_file::ordered_crl_bundles($api_ca_data['peer_certs'], $api_ca_data['ca_crl_bundle'])
-
-  # certificate
-  # ca_bundle
-  # infra_crl_bundle
-  # ca_crl_bundle
-  $ca_data = $api_ca_data.value.reduce({}) |$memo,$name,$value| {
-    {
-      $name => {
-        'ca_bundle'        => $api_ca_data['ca_bundle'],
-        'infra_crl_bundle' => $api_ca_data['crl_bundle'],
-        'ca_crl_bundle'    => $ordered_crl_bundle[$name],
-      }
-    } + $memo
+  $ordered_crl_bundles = {
+    'ca'    => manage_ca_file::ordered_crl_bundles($api_ca_data['peer_certs'], $full_crl_bundle),
+    'infra' => manage_ca_file::ordered_crl_bundles($api_ca_data['peer_certs'], $api_ca_data['crl_bundle']),
   }
 
   # We will use the 'name' var in the apply block below
   $update_targets.each |$target| {
-    $target.set_var('name', $target.name)
+    $target.set_var('hostname', $target.name)
   }
 
   # Note that there is a race condition here around the CRL.
@@ -50,15 +39,15 @@ plan manage_ca_file::sync_cas (
     }
 
     file { '/etc/puppetlabs/puppet/ssl/certs/ca.pem':
-      content => $ca_data[vars('name')]['ca_bundle'],
+      content => $api_ca_data['ca_bundle'],
     }
 
     file { '/etc/puppetlabs/puppet/ssl/ca/infra_crl.pem':
-      content => $ca_data[vars('name')]['infra_crl_bundle'],
+      content => $ordered_crl_bundles['infra'][$hostname],
     }
 
     file { '/etc/puppetlabs/puppet/ssl/ca/ca_crl.pem':
-      content => $ca_data[vars('name')]['ca_crl_bundle'],
+      content => $ordered_crl_bundles['ca'][$hostname],
     }
 
     # Question: does Puppet Server need reloading?

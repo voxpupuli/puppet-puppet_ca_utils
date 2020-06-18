@@ -35,7 +35,7 @@ class CAMerge < TaskHelper
                              .join('')
 
     # Get the peer cert from each CA
-    peer_certs = ca_hostnames.map { |host| [hostname, get_peer_cert(hostname)] }.to_h
+    peer_certs = ca_hostnames.map { |host| [host, get_peer_cert(host)] }.to_h
 
     ca_hostnames.each { |host| close_connection(host) }
 
