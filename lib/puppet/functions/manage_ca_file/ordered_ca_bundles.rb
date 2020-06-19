@@ -9,7 +9,7 @@ Puppet::Functions.create_function(:'manage_ca_file::ordered_ca_bundles') do
     param 'String', :ca_bundle
   end
 
-  def ordered_pems(certs_by_name, ca_bundle, crl_bundle)
+  def ordered_pems(certs_by_name, ca_bundle)
     cert_scan = /-----BEGIN CERTIFICATE-----(?:.|\n)+?-----END CERTIFICATE-----/
     ca_certs = ca_bundle.scan(cert_scan).map { |crt| OpenSSL::X509::Certificate.new(crt) }
     pem_by_name(certs_by_name, ca_certs)
