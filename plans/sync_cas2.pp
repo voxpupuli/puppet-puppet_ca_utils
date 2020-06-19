@@ -1,4 +1,4 @@
-plan manage_ca_file::sync_cas (
+plan manage_ca_file::sync_cas2 (
   TargetSpec     $targets,
   TargetSpec     $ca_hosts             = $targets,
   Enum[full,api] $crl_bundle           = 'full',
@@ -11,32 +11,16 @@ plan manage_ca_file::sync_cas (
     ca_hostnames => $ca_targets.map |$t| { $t.name },
   )[0]
 
-  if ($crl_bundle == 'full') {
-    $full_crl_bundle = run_task('manage_ca_file::get_ca_crl', $ca_targets).map |$r| {
-      $r['ca_crl']
-    }.manage_ca_file::merge_crl_bundles()
-  }
-  else { # $crl_bundle == 'api'
-    $full_crl_bundle = $ca_api_data['crl_bundle']
-  }
+  $full_crl_bundle = $api_ca_data['crl_bundle']
 
+  ## COMMENTING OUT THE LINES BELOW WILL ALLOW THIS PLAN TO WORK SUCCESSFULLY
   $ordered_pem_bundles = {
     'ca_crt'    => manage_ca_file::ordered_ca_bundles($api_ca_data['peer_certs'], $api_ca_data['ca_bundle']),
     'ca_crl'    => manage_ca_file::ordered_crl_bundles($api_ca_data['peer_certs'], $full_crl_bundle),
     'infra_crl' => manage_ca_file::ordered_crl_bundles($api_ca_data['peer_certs'], $api_ca_data['crl_bundle']),
   }
 
-  # We will use the 'name' var in the apply block below
-  $update_targets.each |$target| {
-    $target.set_var('hostname', $target.name)
-  }
-
   apply_prep($update_targets)
-
-  out::message("Full bundle ${api_ca_data['crl_bundle']}")
-  out::message("Full ca_bundle ${ordered_pem_bundles['ca_crt']['puppet002.azcender.com']}")
-  out::message("Full ca_crl ${ordered_pem_bundles['ca_crl']['puppet002.azcender.com']}")
-  out::message("Full infra_crl ${ordered_pem_bundles['infra_crl']['puppet002.azcender.com']}")
 
   # Note that there is a race condition here around the CRL.
   # See https://tickets.puppetlabs.com/browse/SERVER-2550
@@ -49,18 +33,6 @@ plan manage_ca_file::sync_cas (
         true  => Service['pe-puppetserver'],
         false => undef,
       },
-    }
-
-    file { '/etc/puppetlabs/puppet/ssl/certs/ca.pem':
-      content => $ordered_pem_bundles['ca_crt'][$hostname],
-    }
-
-    file { '/etc/puppetlabs/puppet/ssl/ca/ca_crl.pem':
-      content => $ordered_pem_bundles['ca_crl'][$hostname],
-    }
-
-    file { '/etc/puppetlabs/puppet/ssl/ca/infra_crl.pem':
-      content => $ordered_pem_bundles['infra_crl'][$hostname],
     }
 
     # Question: does Puppet Server need reloading?

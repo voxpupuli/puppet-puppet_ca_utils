@@ -19,8 +19,8 @@ Puppet::Functions.create_function(:'manage_ca_file::ordered_ca_bundles') do
     certs_by_name.map do |name,cert_text|
       cert = OpenSSL::X509::Certificate.new(cert_text)
       ordered_obj_array = x509_obj_array.dup
-      unless (idx = ordered_obj_array.find_index { |obj| obj.issuer == cert.issuer })
-        raise "missing ca cert or crl for #{cert}" 
+      unless (idx = ordered_obj_array.find_index { |obj| obj.subject == cert.issuer })
+        raise "missing ca cert for #{cert.subject.to_s} issuer" 
       end
       [name,
        ordered_obj_array.unshift(ordered_obj_array.delete_at(idx))
