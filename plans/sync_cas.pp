@@ -7,7 +7,7 @@ plan manage_ca_file::sync_cas (
   $update_targets = get_targets($targets)
   $ca_targets  = get_targets($ca_hosts)
 
-  $api_ca_data = run_task('manage_ca_file::api_ca_data', 'localhost',
+  $api_ca_data = run_task('manage_ca_file::api_ca_data', $update_targets[0],
     ca_hostnames => $ca_targets.map |$t| { $t.name },
   )[0]
 
@@ -17,7 +17,7 @@ plan manage_ca_file::sync_cas (
     }.manage_ca_file::merge_crl_bundles()
   }
   else { # $crl_bundle == 'api'
-    $full_crl_bundle = $ca_api_data['crl_bundle']
+    $full_crl_bundle = $api_ca_data['crl_bundle']
   }
 
   $ordered_pem_bundles = {
