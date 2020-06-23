@@ -1,3 +1,24 @@
+# @summary Configures two CA servers for mutual trust
+#
+# @param targets
+#   The targets that should be configured for mutual trust relationships.
+#   Generally speaking, this should simply be the list of Puppet CA servers
+#   that mutual trust should be established between.
+# @param ca_hosts
+#   The CA systems to gather trust information from. By default, this will
+#   be the same as the set of targets. Sometimes it may be desirable to gather
+#   trust data from multiple systems but only configure that trust on a
+#   subset. This parameter enables that atypical use case.
+# @param crl_bundle
+#   How to build the CRL bundle. When set to 'full', the plan will run a task
+#   on each ca_hosts target to collect the full CRL information. When set to
+#   'api', the data gathered will be limited to data available from the Puppet
+#   CA REST API.
+# @param restart_puppetserver
+#   Whether or not to restart Puppet Server after reconfiguring it. Defaults
+#   to false. Do not set this to true if using the orchestrator as the Bolt
+#   transport.
+#
 plan mutual_ca_trust::configure_ca_servers (
   TargetSpec     $targets,
   TargetSpec     $ca_hosts             = $targets,

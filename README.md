@@ -1,36 +1,41 @@
-# mutual_ca_trust
+# mutual\_ca\_trust
 
-Synchrozies certificates from differing Puppet CAs so that thier agents can be used with both.
-
-## Table of Contents
-
-1. [Description](#description)
-2. [Setup - The basics of getting started with mutual_ca_trust](#setup)
-    * [Beginning with mutual_ca_trust](#beginning-with-mutual_ca_trust)
-3. [Usage - Configuration options and additional functionality](#usage)
-4. [Limitations - OS compatibility, etc.](#limitations)
-5. [Development - Guide for contributing to the module](#development)
-
-## Description
-
-Briefly tell users why they might want to use your module. Explain what your module does and what kind of problems users can solve with it.
-
-This should be a fairly short description helps the user decide if your module is what they want.
-
-## Setup
-
-### Beginning with mutual_ca_trust
-
-The very basic steps needed for a user to get the module up and running. This can include setup steps, if necessary, or it can be an example of the most basic use of the module.
+Synchrozies certificates from differing Puppet CAs so that agents can be transfered easily between them.
 
 ## Usage
 
-Include usage examples for common use cases in the **Usage** section. Show your users how to use your module to solve problems, and be sure to include code examples. Include three to five examples of the most important or common tasks a user can accomplish with your module. Show users how to accomplish more complex tasks that involve different types, classes, and functions working in tandem.
+### mutual\_ca\_trust::configure\_ca\_servers plan
+
+Basic usage. Configures both puppet-ca-01 and puppet-ca-02 to trust certs issued by either CA.
+
+```
+bolt plan run mutual_ca_trust::configure_ca_servers \
+  --target puppet-ca-01.example.com \
+  --target puppet-ca-02.example.com
+```
+
+Asymetrical usage. Configures puppet-ca-01 to trust certs issued by either CA, but does not configure puppet-ca-02 to trust puppet-ca-01.
+
+```
+bolt plan run mutual_ca_trust::configure_ca_servers \
+  --target puppet-ca-01.example.com \
+  ca_hosts='["puppet-ca-01.example.com","puppet-ca-02.example.com"]'
+```
+
+### mutual\_ca\_trust::configure\_agent task
+
+In order to trust a given CA server, an agent may need to have its CA bundle and CRL refreshed. An example task is included to do this. The example below shows using the task to configure agent-01 to connect to puppet-lb-01.example.com (a load balancer in front of compilers attached to puppet-ca-01.example.com).
+
+```
+bolt task run mutual_ca_trust::configure_agent \
+  --target agent-01.example.com \
+  server=puppet-lb-01.example.com
+```
 
 ## Limitations
 
-In the Limitations section, list any incompatibilities, known issues, or other warnings.
+The mutual\_ca\_trust::configure\_ca\_servers plan does not have safeguards. It is possible to accidentally overwrite CA configuration in a non-ideal way if the parameters given are incorrect. For example, it is possible to configure a CA server not to trust its own issued certificates, and lose CA data in the process.
 
 ## Development
 
-In the Development section, tell other users the ground rules for contributing to your project and how they should submit their work.
+Based on fervidus-manage\_ca\_file
