@@ -1,12 +1,12 @@
-# manage_ca_file
+# mutual_ca_trust
 
 Synchrozies certificates from differing Puppet CAs so that thier agents can be used with both.
 
 ## Table of Contents
 
 1. [Description](#description)
-2. [Setup - The basics of getting started with manage_ca_file](#setup)
-    * [Beginning with manage_ca_file](#beginning-with-manage_ca_file)
+2. [Setup - The basics of getting started with mutual_ca_trust](#setup)
+    * [Beginning with mutual_ca_trust](#beginning-with-mutual_ca_trust)
 3. [Usage - Configuration options and additional functionality](#usage)
 4. [Limitations - OS compatibility, etc.](#limitations)
 5. [Development - Guide for contributing to the module](#development)
@@ -19,7 +19,7 @@ This should be a fairly short description helps the user decide if your module i
 
 ## Setup
 
-### Beginning with manage_ca_file
+### Beginning with mutual_ca_trust
 
 The very basic steps needed for a user to get the module up and running. This can include setup steps, if necessary, or it can be an example of the most basic use of the module.
 

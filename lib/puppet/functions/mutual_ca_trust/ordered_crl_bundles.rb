@@ -3,7 +3,7 @@
 require 'net/http'
 require 'openssl'
 
-Puppet::Functions.create_function(:'manage_ca_file::ordered_crl_bundles') do
+Puppet::Functions.create_function(:'mutual_ca_trust::ordered_crl_bundles') do
   dispatch :ordered_pems do
     param 'Hash',   :certs_by_name
     param 'String', :crl_bundle

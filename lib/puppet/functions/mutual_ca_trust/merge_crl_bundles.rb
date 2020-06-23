@@ -3,7 +3,7 @@
 require 'net/http'
 require 'openssl'
 
-Puppet::Functions.create_function(:'manage_ca_file::merge_crl_bundles') do
+Puppet::Functions.create_function(:'mutual_ca_trust::merge_crl_bundles') do
   dispatch :merge_crl_bundles do
     repeated_param 'Variant[String, Array[String]]', :bundles
   end
