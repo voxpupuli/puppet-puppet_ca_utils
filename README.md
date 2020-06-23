@@ -13,24 +13,34 @@ Synchrozies certificates from differing Puppet CAs so that thier agents can be u
 
 ## Description
 
-Briefly tell users why they might want to use your module. Explain what your module does and what kind of problems users can solve with it.
+You may be in an environment where you're agents must talk to multiple PE environments that use different certificate authorities.
 
-This should be a fairly short description helps the user decide if your module is what they want.
+For this to work you're agents must carry credentials for both certificate authories.
+
+This module manages the credentials for these agents.
 
 ## Setup
 
 ### Beginning with manage_ca_file
 
-The very basic steps needed for a user to get the module up and running. This can include setup steps, if necessary, or it can be an example of the most basic use of the module.
+This module contains a plan runs on a local CA and takes the hostname for the remote CA as an argument.
+
+It's easiest to run this directly on the PE console of the 'local' CA.
+
+You can run using bolt locally, but you must integrate PE client tools to talk to the 'local' CA.
 
 ## Usage
 
-Include usage examples for common use cases in the **Usage** section. Show your users how to use your module to solve problems, and be sure to include code examples. Include three to five examples of the most important or common tasks a user can accomplish with your module. Show users how to accomplish more complex tasks that involve different types, classes, and functions working in tandem.
+Run from the PE console.
+
+or
+
+`bolt plan run manage_ca_file::sync_cas remote_ca_hostname=<value>`
 
 ## Limitations
 
-In the Limitations section, list any incompatibilities, known issues, or other warnings.
+This project has been tested on PE versions of 2019.x.
 
 ## Development
 
-In the Development section, tell other users the ground rules for contributing to your project and how they should submit their work.
+We thank the community and appreciate contributions.
