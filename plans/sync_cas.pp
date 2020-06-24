@@ -31,6 +31,8 @@ plan manage_ca_file::sync_cas (
     $target.set_var('hostname', $target.name)
   }
 
+  apply_prep($update_targets)
+
   # Note that there is a race condition here around the CRL.
   # See https://tickets.puppetlabs.com/browse/SERVER-2550
   apply($update_targets) {
