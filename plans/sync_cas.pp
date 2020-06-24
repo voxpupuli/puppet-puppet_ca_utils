@@ -5,11 +5,13 @@ plan manage_ca_file::sync_cas (
   Boolean        $restart_puppetserver = false,
 ) {
   $update_targets = get_targets($targets)
-  $ca_targets  = get_targets($ca_hosts)
+  # $ca_targets  = get_targets($ca_hosts)
 
-  $api_ca_data = run_task('manage_ca_file::api_ca_data', $update_targets[0],
-    ca_hostnames => $ca_targets.map |$t| { $t.name },
-  )[0]
+  # $api_ca_data = run_task('manage_ca_file::api_ca_data', $update_targets[0],
+  #   ca_hostnames => $ca_targets.map |$t| { $t.name },
+  # )[0]
+
+  $api_ca_data = { 'crl_bundle' => 'X' }
 
   out::message("Bundle ${api_ca_data['crl_bundle']}")
 
