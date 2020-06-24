@@ -11,6 +11,8 @@ plan manage_ca_file::sync_cas (
     ca_hostnames => $ca_targets.map |$t| { $t.name },
   )[0]
 
+  out::message("Bundle ${api_ca_data['crl_bundle']}")
+
   if ($crl_bundle == 'full') {
     $full_crl_bundle = run_task('manage_ca_file::get_ca_crl', $ca_targets).map |$r| {
       $r['ca_crl']
@@ -31,7 +33,7 @@ plan manage_ca_file::sync_cas (
     $target.set_var('hostname', $target.name)
   }
 
-  apply_prep($update_targets)
+  # apply_prep($update_targets)
 
   # Note that there is a race condition here around the CRL.
   # See https://tickets.puppetlabs.com/browse/SERVER-2550
