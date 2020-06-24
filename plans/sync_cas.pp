@@ -17,7 +17,7 @@ plan manage_ca_file::sync_cas (
     }.manage_ca_file::merge_crl_bundles()
   }
   else { # $crl_bundle == 'api'
-    $full_crl_bundle = $ca_api_data['crl_bundle']
+    $full_crl_bundle = $api_ca_data['crl_bundle']
   }
 
   $ordered_pem_bundles = {
