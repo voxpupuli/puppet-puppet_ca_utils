@@ -17,7 +17,7 @@ plan manage_ca_file::sync_cas (
     }.manage_ca_file::merge_crl_bundles()
   }
   else { # $crl_bundle == 'api'
-    $full_crl_bundle = $ca_api_data['crl_bundle']
+    $full_crl_bundle = $api_ca_data['crl_bundle']
   }
 
   $ordered_pem_bundles = {
@@ -28,43 +28,12 @@ plan manage_ca_file::sync_cas (
 
   # We will use the 'name' var in the apply block below
   $update_targets.each |$target| {
-    $target.set_var('hostname', $target.name)
-  }
+    # $target.set_var('local_name', $target.name)
+    run_task('manage_ca_file::write_file', $target, filepath => '/etc/puppetlabs/puppet/ssl/certs/ca.pem', content => $ordered_pem_bundles['ca_crt'][$target.name], owner => pe-puppet, group => pe-puppet)
+    run_task('manage_ca_file::write_file', $target, filepath => '/etc/puppetlabs/puppet/ssl/ca/ca_crl.pem', content => $ordered_pem_bundles['ca_crl'][$target.name], owner => pe-puppet, group => pe-puppet)
+    run_task('manage_ca_file::write_file', $target, filepath => '/etc/puppetlabs/puppet/ssl/ca/infra_crl.pem', content => $ordered_pem_bundles['infra_crl'][$target.name], owner => pe-puppet, group => pe-puppet)
 
-  apply_prep($update_targets)
-
-  out::message("Full bundle ${api_ca_data['crl_bundle']}")
-  out::message("Full ca_bundle ${ordered_pem_bundles['ca_crt']['puppet002.azcender.com']}")
-  out::message("Full ca_crl ${ordered_pem_bundles['ca_crl']['puppet002.azcender.com']}")
-  out::message("Full infra_crl ${ordered_pem_bundles['infra_crl']['puppet002.azcender.com']}")
-
-  # Note that there is a race condition here around the CRL.
-  # See https://tickets.puppetlabs.com/browse/SERVER-2550
-  apply($update_targets) {
-    File {
-      ensure => file,
-      owner  => 'pe-puppet',
-      group  => 'pe-puppet',
-      notify => $restart_puppetserver ? {
-        true  => Service['pe-puppetserver'],
-        false => undef,
-      },
-    }
-
-    file { '/etc/puppetlabs/puppet/ssl/certs/ca.pem':
-      content => $ordered_pem_bundles['ca_crt'][$hostname],
-    }
-
-    file { '/etc/puppetlabs/puppet/ssl/ca/ca_crl.pem':
-      content => $ordered_pem_bundles['ca_crl'][$hostname],
-    }
-
-    file { '/etc/puppetlabs/puppet/ssl/ca/infra_crl.pem':
-      content => $ordered_pem_bundles['infra_crl'][$hostname],
-    }
-
-    # Question: does Puppet Server need reloading?
-    service { 'pe-puppetserver': }
+    run_task('service', $target, action => 'restart', name => 'pe-puppetserver')
   }
 
   # Note: agents and compilers will recieve the updated CA bundle and CRL through normal
