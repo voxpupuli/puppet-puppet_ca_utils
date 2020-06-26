@@ -7,14 +7,15 @@ require 'digest'
 
 # Bolt task using helper
 class CAMerge < TaskHelper
-  CERT_SCAN = %r{-----BEGIN CERTIFICATE-----(?:.|\n)+?-----END CERTIFICATE-----}
-  CRL_SCAN = %r{-----BEGIN X509 CRL-----(?:.|\n)+?-----END X509 CRL-----}
+
+  CERT_SCAN = /-----BEGIN CERTIFICATE-----(?:.|\n)+?-----END CERTIFICATE-----/
+  CRL_SCAN = /-----BEGIN X509 CRL-----(?:.|\n)+?-----END X509 CRL-----/
 
   def initialize
     @conn = {}
   end
 
-  def task(ca_hostnames:, **_kwargs)
+  def task(ca_hostnames:, **kwargs)
     # Open connections to each CA
     ca_hostnames.each { |host| open_connection(host) }
 
@@ -29,7 +30,7 @@ class CAMerge < TaskHelper
                              .flatten
                              .map { |crl| OpenSSL::X509::CRL.new(crl) }
                              .group_by { |crl| crl.issuer.hash }
-                             .map { |_, crls| crls.max_by { |crl| crl.last_update } }
+                             .map { |_,crls| crls.max_by { |crl| crl.last_update } }
                              .map { |crl| crl.to_pem }
                              .join('')
 
@@ -45,7 +46,7 @@ class CAMerge < TaskHelper
   rescue => e
     TaskHelper::Error.new(e.message,
                           'merge-ca-api-data/error',
-                          'backtrace' => e.backtrace)
+                          { 'backtrace' => e.backtrace })
   end
 
   def get_ca_bundle(host)
