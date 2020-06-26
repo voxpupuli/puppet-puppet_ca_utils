@@ -1,9 +1,11 @@
 # @summary Configures two CA servers for mutual trust
 #
 # @param targets
-#   The targets that should be configured for mutual trust relationships.
-#   Generally speaking, this should simply be the list of Puppet CA servers
-#   that mutual trust should be established between.
+
+#   The CA server targets that should be configured for mutual trust
+#   relationships. Generally speaking, this should simply be the list of
+#   Puppet CA servers that mutual trust should be established between.
+
 # @param ca_hosts
 #   The CA systems to gather trust information from. By default, this will
 #   be the same as the set of targets. Sometimes it may be desirable to gather
@@ -19,7 +21,7 @@
 #   to false. Do not set this to true if using the orchestrator as the Bolt
 #   transport.
 #
-plan mutual_ca_trust::configure_ca_servers (
+plan puppet_ca_utils::configure_ca_server_trust (
   TargetSpec     $targets,
   TargetSpec     $ca_hosts             = $targets,
   Enum[full,api] $crl_bundle           = 'full',
@@ -28,23 +30,23 @@ plan mutual_ca_trust::configure_ca_servers (
   $update_targets = get_targets($targets)
   $ca_targets  = get_targets($ca_hosts)
 
-  $api_ca_data = run_task('mutual_ca_trust::api_ca_data', 'localhost',
+  $api_ca_data = run_task('puppet_ca_utils::api_ca_data', 'localhost',
     ca_hostnames => $ca_targets.map |$t| { $t.name },
   )[0]
 
   if ($crl_bundle == 'full') {
-    $full_crl_bundle = run_task('mutual_ca_trust::get_ca_crl', $ca_targets).map |$r| {
+    $full_crl_bundle = run_task('puppet_ca_utils::get_ca_crl', $ca_targets).map |$r| {
       $r['ca_crl']
-    }.mutual_ca_trust::merge_crl_bundles()
+    }.puppet_ca_utils::merge_crl_bundles()
   }
   else { # $crl_bundle == 'api'
     $full_crl_bundle = $ca_api_data['crl_bundle']
   }
 
   $ordered_pem_bundles = {
-    'ca_crt'    => mutual_ca_trust::ordered_ca_bundles($api_ca_data['peer_certs'], $api_ca_data['ca_bundle']),
-    'ca_crl'    => mutual_ca_trust::ordered_crl_bundles($api_ca_data['peer_certs'], $full_crl_bundle),
-    'infra_crl' => mutual_ca_trust::ordered_crl_bundles($api_ca_data['peer_certs'], $api_ca_data['crl_bundle']),
+    'ca_crt'    => puppet_ca_utils::ordered_ca_bundles($api_ca_data['peer_certs'], $api_ca_data['ca_bundle']),
+    'ca_crl'    => puppet_ca_utils::ordered_crl_bundles($api_ca_data['peer_certs'], $full_crl_bundle),
+    'infra_crl' => puppet_ca_utils::ordered_crl_bundles($api_ca_data['peer_certs'], $api_ca_data['crl_bundle']),
   }
 
   # We will use the 'name' var in the apply block below

@@ -4,12 +4,12 @@ Synchrozies certificates from differing Puppet CAs so that agents can be transfe
 
 ## Usage
 
-### mutual\_ca\_trust::configure\_ca\_servers plan
+### mutual\_ca\_trust::configure\_ca\_server\_trust plan
 
 Basic usage. Configures both puppet-ca-01 and puppet-ca-02 to trust certs issued by either CA.
 
 ```
-bolt plan run mutual_ca_trust::configure_ca_servers \
+bolt plan run puppet_ca_utils::configure_ca_server_trust \
   --target puppet-ca-01.example.com \
   --target puppet-ca-02.example.com
 ```
@@ -17,17 +17,17 @@ bolt plan run mutual_ca_trust::configure_ca_servers \
 Asymetrical usage. Configures puppet-ca-01 to trust certs issued by either CA, but does not configure puppet-ca-02 to trust puppet-ca-01.
 
 ```
-bolt plan run mutual_ca_trust::configure_ca_servers \
+bolt plan run puppet_ca_utils::configure_ca_server_trust \
   --target puppet-ca-01.example.com \
   ca_hosts='["puppet-ca-01.example.com","puppet-ca-02.example.com"]'
 ```
 
-### mutual\_ca\_trust::configure\_agent task
+### mutual\_ca\_trust::configure\_agent\_trust task
 
 In order to trust a given CA server, an agent may need to have its CA bundle and CRL refreshed. An example task is included to do this. The example below shows using the task to configure agent-01 to connect to puppet-lb-01.example.com (a load balancer in front of compilers attached to puppet-ca-01.example.com).
 
 ```
-bolt task run mutual_ca_trust::configure_agent \
+bolt task run puppet_ca_utils::configure_agent_trust \
   --target agent-01.example.com \
   server=puppet-lb-01.example.com
 ```
@@ -38,4 +38,3 @@ The mutual\_ca\_trust::configure\_ca\_servers plan does not have safeguards. It 
 
 ## Development
 
-Based on fervidus-manage\_ca\_file
