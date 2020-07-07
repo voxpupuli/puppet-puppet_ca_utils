@@ -67,12 +67,32 @@ plan puppet_ca_utils::configure_ca_server_trust (
       },
     }
 
-    file { '/etc/puppetlabs/puppet/ssl/certs/ca.pem':
-      content => $ordered_pem_bundles['ca_crt'][$hostname],
+    file { 'copy-of-original-ca-cert':
+      path    => '/etc/puppetlabs/puppet/ssl/ca/ca_crt.pem.pre-configure_ca_server_trust',
+      content => '/etc/puppetlabs/puppet/ssl/ca/ca_crt.pem',
+      replace => false,
     }
 
-    file { '/etc/puppetlabs/puppet/ssl/ca/ca_crl.pem':
+    file { [
+      '/etc/puppetlabs/puppet/ssl/certs/ca.pem',
+      '/etc/puppetlabs/puppet/ssl/ca/ca_crt.pem',
+    ]:
+      content => $ordered_pem_bundles['ca_crt'][$hostname],
+      require => File['copy-of-original-ca-cert'],
+    }
+
+    file { 'copy-of-original-crl':
+      path    => '/etc/puppetlabs/puppet/ssl/ca/ca_crl.pem.pre-configure_ca_server_trust',
+      content => '/etc/puppetlabs/puppet/ssl/ca/ca_crl.pem',
+      replace => false,
+    }
+
+    file { [
+      '/etc/puppetlabs/puppet/ssl/crl.pem',
+      '/etc/puppetlabs/puppet/ssl/ca/ca_crl.pem',
+    ]:
       content => $ordered_pem_bundles['ca_crl'][$hostname],
+      require => File['copy-of-original-crl'],
     }
 
     file { '/etc/puppetlabs/puppet/ssl/ca/infra_crl.pem':

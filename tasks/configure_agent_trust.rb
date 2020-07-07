@@ -8,7 +8,7 @@ require 'json'
 # is the first argument to the script.
 server = ARGV[0] || JSON.parse(STDIN.read)['server']
 
-raise "Must provide server argument!" if server.nil?
+raise 'Must provide server argument!' if server.nil?
 
 Puppet.initialize_settings
 
@@ -27,6 +27,6 @@ ca_path  = Puppet.settings['localcacert']
 File.write(ca_path, ca)
 File.write(crl_path, crl)
 
-if (Puppet.version.split('.').first.to_i < 6)
+if Puppet.version.split('.').first.to_i < 6
   Puppet::Face['config', '0.0.1'].set('certificate_revocation', 'leaf', section: 'main')
 end
