@@ -37,4 +37,3 @@ bolt task run puppet_ca_utils::configure_agent_trust \
 The puppet\_ca\_utils::configure\_ca\_servers plan does not have safeguards. It is possible to accidentally overwrite CA configuration in a non-ideal way if the parameters given are incorrect. For example, it is possible to configure a CA server not to trust its own issued certificates, and lose CA data in the process.
 
 ## Development
-

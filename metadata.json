@@ -2,22 +2,18 @@
   "name": "fervid-puppet_ca_utils",
   "version": "0.1.0",
   "author": "Bryan Belanger",
-  "summary": "",
+  "summary": "Synchrozies certificates from differing Puppet CAs so that agents can be transfered easily between them",
   "license": "Apache-2.0",
-  "source": "",
-  "dependencies": [
-
-  ],
-  "operatingsystem_support": [
-
-  ],
+  "source": "https://github.com/fervidus/puppet_ca_utils",
+  "dependencies": [],
+  "operatingsystem_support": [],
   "requirements": [
     {
       "name": "puppet",
-      "version_requirement": ">= 4.10.0 < 7.0.0"
+      "version_requirement": ">= 4.10.0 < 9.0.0"
     }
   ],
-  "pdk-version": "1.18.0",
-  "template-url": "pdk-default#1.18.0",
-  "template-ref": "tags/1.18.0-0-g095317c"
+  "pdk-version": "3.0.0",
+  "template-url": "pdk-default#3.0.0",
+  "template-ref": "tags/3.0.0-0-g056e50d"
 }
