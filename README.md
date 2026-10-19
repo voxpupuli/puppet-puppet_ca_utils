@@ -1,5 +1,13 @@
 # puppet\_ca\_utils
 
+[![License](https://img.shields.io/github/license/voxpupuli/puppet-puppet_ca_utils.svg)](https://github.com/voxpupuli/puppet-puppet_ca_utils/blob/main/LICENSE)
+![Build Status](https://github.com/voxpupuli/puppet-puppet_ca_utils/actions/workflows/ci.yml/badge.svg?branch=main)
+[![Puppet Forge](https://img.shields.io/puppetforge/v/puppet/puppet_ca_utils.svg)](https://forge.puppetlabs.com/puppet/puppet_ca_utils)
+[![Puppet Forge - downloads](https://img.shields.io/puppetforge/dt/puppet/puppet_ca_utils.svg)](https://forge.puppetlabs.com/puppet/puppet_ca_utils)
+[![Puppet Forge - endorsement](https://img.shields.io/puppetforge/e/puppet/puppet_ca_utils.svg)](https://forge.puppetlabs.com/puppet/puppet_ca_utils)
+[![Puppet Forge - scores](https://img.shields.io/puppetforge/f/puppet/puppet_ca_utils.svg)](https://forge.puppetlabs.com/puppet/puppet_ca_utils)
+
+
 Synchronises certificates from differing Puppet CAs so that agents can be transferred easily between them.
 
 ## Usage

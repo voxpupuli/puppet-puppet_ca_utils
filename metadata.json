@@ -1,10 +1,10 @@
 {
-  "name": "fervid-puppet_ca_utils",
+  "name": "puppet-puppet_ca_utils",
   "version": "0.1.0",
-  "author": "Bryan Belanger",
+  "author": "Vox Pupuli",
   "summary": "Synchrozies certificates from differing Puppet CAs so that agents can be transfered easily between them",
   "license": "Apache-2.0",
-  "source": "https://github.com/fervidus/puppet_ca_utils",
+  "source": "https://github.com/voxpupuli/puppet-puppet_ca_utils",
   "dependencies": [],
   "operatingsystem_support": [],
   "requirements": [
