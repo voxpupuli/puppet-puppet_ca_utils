@@ -11,6 +11,10 @@
     {
       "name": "puppet",
       "version_requirement": ">= 4.10.0 < 9.0.0"
+    },
+    {
+      "name": "openvox",
+      "version_requirement": ">= 8.19.0 < 10.0.0"
     }
   ]
 }
