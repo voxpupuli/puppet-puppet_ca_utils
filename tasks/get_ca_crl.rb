@@ -4,7 +4,6 @@
 require 'json'
 
 begin
-  params  = JSON.parse(STDIN.read)
   content = File.read('/etc/puppetlabs/puppet/ssl/ca/ca_crl.pem')
 
   result = {

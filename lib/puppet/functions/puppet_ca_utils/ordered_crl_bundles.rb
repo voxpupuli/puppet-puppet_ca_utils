@@ -16,17 +16,18 @@ Puppet::Functions.create_function(:'puppet_ca_utils::ordered_crl_bundles') do
   end
 
   def pem_by_name(certs_by_name, x509_obj_array)
-    certs_by_name.map { |name, cert_text|
+    certs_by_name.map do |name, cert_text|
       cert = OpenSSL::X509::Certificate.new(cert_text)
       ordered_obj_array = x509_obj_array.dup
       unless (idx = ordered_obj_array.find_index { |obj| obj.issuer == cert.issuer })
         raise "missing crl for #{cert.subject} issuer"
       end
+
       [name,
        ordered_obj_array.unshift(ordered_obj_array.delete_at(idx))
                         .map { |obj| obj.to_pem }
                         .join('')
-                        .encode('ascii')]
-    }.to_h
+                        .encode('ascii'),]
+    end.to_h
   end
 end

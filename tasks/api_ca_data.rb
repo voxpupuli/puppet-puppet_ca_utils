@@ -1,7 +1,7 @@
 #!/opt/puppetlabs/puppet/bin/ruby
 # frozen_string_literal: true
 
-require_relative '../../ruby_task_helper/files/task_helper.rb'
+require_relative '../../ruby_task_helper/files/task_helper'
 require 'net/http'
 require 'digest'
 
@@ -41,8 +41,8 @@ class CAMerge < TaskHelper
     # Return the merged data
     { ca_bundle:  ca_bundle,
       crl_bundle: crl_bundle,
-      peer_certs: peer_certs }
-  rescue => e
+      peer_certs: peer_certs, }
+  rescue StandardError => e
     TaskHelper::Error.new(e.message,
                           'merge-ca-api-data/error',
                           'backtrace' => e.backtrace)

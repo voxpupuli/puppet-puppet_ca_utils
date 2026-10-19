@@ -27,6 +27,4 @@ ca_path  = Puppet.settings['localcacert']
 File.write(ca_path, ca)
 File.write(crl_path, crl)
 
-if Puppet.version.split('.').first.to_i < 6
-  Puppet::Face['config', '0.0.1'].set('certificate_revocation', 'leaf', section: 'main')
-end
+Puppet::Face['config', '0.0.1'].set('certificate_revocation', 'leaf', section: 'main') if Puppet.version.split('.').first.to_i < 6
